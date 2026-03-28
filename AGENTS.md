@@ -30,7 +30,27 @@ On first launch, check if the git remote still points to the ClickCampaigns temp
 On first launch, briefly let the user know:
 - **API keys are optional but recommended.** Copy `.env.example` to `.env` and add a Gemini key (AI images) and Pexels key (stock photos) for best results. Core functionality works without them.
 - **Your `.env` file is already gitignored** — your keys will never be committed to GitHub.
-- **All output goes to each client's `output-assets/`** — organized by type (html, emails, ads, etc.).
+- **All output goes to `clients/{client}/campaigns/{campaign}/output-assets/`** — each campaign is isolated.
+
+---
+
+## Campaign Initialization (Required Before Creating Assets)
+
+Before creating ANY assets, Alex must establish a campaign working directory.
+
+### If the user provides a campaign token:
+1. Call `get_campaign` with the token
+2. Use the `slug` field from the response as the campaign folder name
+3. Ask which client this campaign is for (or derive from brand kit name)
+4. Create: `clients/{client-name}/campaigns/{slug}/output-assets/` with subfolders: `html/`, `emails/`, `documents/`, `presentations/`, `images/`, `ads/`, `pdfs/`
+5. ALL output for this campaign goes into that folder
+
+### If the user is in Direct or Guided mode (no token):
+1. Ask the user for a client name and campaign name
+2. Slugify both: lowercase, hyphens, no special characters
+3. Create the same folder structure
+
+### NEVER save assets to a root-level or client-level `output-assets/` directory. Every campaign gets its own isolated folder.
 
 ---
 
@@ -46,29 +66,28 @@ ClickCampaigns/
 │       ├── brand-kit/
 │       │   ├── knowledge-base/       # Client's brand info, product details
 │       │   └── style-guide/          # Client's colors, fonts, logos
-│       ├── campaigns/                # Client's campaigns
-│       │   └── [campaign-name]/
-│       └── output-assets/            # Client's deliverables
-│           ├── html/
-│           ├── emails/
-│           ├── ads/
-│           ├── documents/
-│           ├── presentations/
-│           ├── pdfs/
-│           └── images/
+│       └── campaigns/                # Client's campaigns
+│           ├── summer-launch/        # Campaign 1
+│           │   └── output-assets/
+│           │       ├── html/
+│           │       ├── emails/
+│           │       └── ...
+│           └── black-friday/         # Campaign 2
+│               └── output-assets/
+│                   └── ...
 ```
 
 ### Adding a New Client
-When the user mentions a new client, create a folder under `clients/` with the client's name. Copy the folder structure from the example above.
+When the user mentions a new client, create a folder under `clients/` with the client's name (slugified). Include `brand-kit/knowledge-base/`, `brand-kit/style-guide/`, and `campaigns/` subfolders.
 
 ### Where to Save Assets
-- Save all output to `clients/[client-name]/output-assets/` in the appropriate subfolder
+- Save all output to `clients/{client}/campaigns/{campaign}/output-assets/` in the appropriate subfolder
 - Use descriptive file names: `vsl-hybrid-sales-page.html`, `launch-sequence-emails.md`
-- Keep each client's work completely separate
+- Each campaign is fully isolated — no file collisions between campaigns or clients
 
 ### Brand Kit
-- Drop client brand documents into `clients/[client-name]/brand-kit/knowledge-base/`
-- Drop style guide into `clients/[client-name]/brand-kit/style-guide/`
+- Drop client brand documents into `clients/{client}/brand-kit/knowledge-base/`
+- Drop style guide into `clients/{client}/brand-kit/style-guide/`
 - When a campaign is loaded via `get_campaign`, its brand kit from ClickCampaigns.ai is included automatically
 
 ---
@@ -94,7 +113,7 @@ When the user mentions a new client, create a folder under `clients/` with the c
 3. **Read the skill** — Before creating any asset, call `get_skill` with the path from the skill map
 4. **Load the specialist** — Call `get_agent` to adopt the right specialist's persona
 5. **Create the asset** — Follow the skill framework to create the deliverable
-6. **Save to output folder** — Save files to the client's `output-assets/` subfolder
+6. **Save to campaign folder** — Save files to `clients/{client}/campaigns/{campaign}/output-assets/` in the right subfolder
 7. **Report status** — Call `report_status` to update the SaaS dashboard
 
 ---
