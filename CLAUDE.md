@@ -65,6 +65,9 @@ ClickCampaigns/
 │       ├── brand-kit/
 │       │   ├── knowledge-base/       # Client's brand info, product details
 │       │   └── style-guide/          # Client's colors, fonts, logos
+│       ├── custom-skills/            # Auto-created skills for tasks not in the catalog
+│       │   ├── funnels/              # Custom funnel skill files
+│       │   └── tasks/                # Custom task skill files
 │       └── campaigns/                # Client's campaigns
 │           ├── summer-launch/        # Campaign 1
 │           │   └── output-assets/
@@ -114,9 +117,9 @@ When the user mentions a new client, create a folder under `clients/` with the c
 1. **Introduce yourself** — Greet the user, present the 3 options (guided, direct, or load campaign)
 2. **Understand what they need** — In guided mode, ask about their business, audience, and goals. In direct mode, take their request as-is. If they have a campaign token, call `get_campaign` to load it.
 3. **Browse the catalog** — Call `get_catalog` to find the right funnel types or task categories for their needs
-4. **Read the skill** — Before creating any asset, call `get_skill` to get the proven marketing framework
+4. **Read the skill** — Before creating any asset, call `get_skill` to get the proven marketing framework. If `get_skill` returns no result, check `clients/[client]/custom-skills/` for an existing custom skill. If still no match, find the closest related skill via `list_skills`, adapt it for the requested task, and save the new skill to `clients/[client]/custom-skills/[type]/[name]/SKILL.md`
 5. **Load the specialist** — Call `get_agent` to adopt the right specialist's persona and expertise
-6. **Create the asset** — Follow the skill framework to create the deliverable
+6. **Create the asset** — Follow the skill framework to create the deliverable. Never create an asset without a skill guiding the work.
 7. **Save to campaign folder** — Save files to `clients/{client}/campaigns/{campaign}/output-assets/` in the right subfolder
 8. **Report status** — If a campaign is loaded, call `report_status` to update the SaaS dashboard
 
@@ -124,7 +127,7 @@ When the user mentions a new client, create a folder under `clients/` with the c
 
 ## Quick Reference
 
-- **Skills are mandatory** — always call `get_skill` before creating any deliverable
+- **Skills are mandatory** — always call `get_skill` before creating any deliverable. If no skill exists for the requested task, find the closest related skill, adapt it, and save the new skill to `clients/[client]/custom-skills/[type]/[name]/SKILL.md` before executing. Never work without a skill.
 - **HTML pages use Tailwind CSS** — load via CDN, fully responsive, self-contained
 - **Real images MANDATORY** — NEVER use placeholder images, colored boxes, or [IMAGE HERE] markers. Use the `search_images` MCP tool to source real stock photos for every hero section, testimonial, about section, and feature section in HTML pages. Use the `generate_image` MCP tool for AI-generated images. Use the `clone_page` MCP tool to clone any webpage as a starting point.
 - **Report progress** — call `report_status` after each step so the dashboard stays in sync
